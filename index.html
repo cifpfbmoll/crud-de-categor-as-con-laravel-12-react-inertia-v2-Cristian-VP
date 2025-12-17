@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Laravel 12 + React + Inertia.js + TypeScript</title>
+    
+    <!-- Reveal.js CSS via CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/night.min.css">
+    
+    <!-- Highlight.js para código -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+    
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+        .reveal pre { width: 100%; font-size: 0.55em; }
+        .reveal pre code { max-height: 500px; }
+        .reveal .small-code pre { font-size: 0.45em; }
+        .reveal ul { text-align: left; }
+        .reveal .tech-stack { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .reveal .tech-item { background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 10px; }
+        .reveal .highlight { color: #42affa; }
+        .reveal .warning { color: #f39c12; }
+        .reveal .success { color: #2ecc71; }
+        .reveal table { margin: 0 auto; }
+        .reveal table th { background: #42affa; color: white; }
+        .reveal table td, .reveal table th { padding: 10px 20px; border: 1px solid #444; }
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.7em; margin: 5px; }
+        .badge-php { background: #777BB4; }
+        .badge-ts { background: #3178C6; }
+        .badge-react { background: #61DAFB; color: #000; }
+        .badge-laravel { background: #FF2D20; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- ==================== SLIDE 1: TÍTULO ==================== -->
+            <section>
+                <h1>CRUD Full-Stack</h1>
+                <h3>Laravel 12 + React + Inertia.js + TypeScript</h3>
+                <p style="margin-top: 40px;">
+                    <span class="badge badge-laravel">Laravel 12</span>
+                    <span class="badge badge-react">React 19</span>
+                    <span class="badge badge-ts">TypeScript 5</span>
+                </p>
+                <p style="margin-top: 30px; font-size: 0.8em;">
+                    Guía paso a paso para desarrolladores Junior
+                </p>
+                <p style="font-size: 0.6em; color: #888;">
+                    Máximo Fernández Riera | CIFP Francesc de Borja Moll
+                </p>
+            </section>
+
+            <!-- ==================== SLIDE 2: STACK TECNOLÓGICO ==================== -->
+            <section>
+                <h2>Stack Tecnológico</h2>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h4 class="highlight">Laravel 12</h4>
+                        <p>Backend PHP</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4 class="highlight">React 19</h4>
+                        <p>Frontend UI</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4 class="highlight">Inertia.js</h4>
+                        <p>SPA sin API</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4 class="highlight">TypeScript</h4>
+                        <p>Tipado estático</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4 class="highlight">Tailwind CSS</h4>
+                        <p>Estilos</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== SLIDE 3: ¿QUÉ ES INERTIA? ==================== -->
+            <section>
+                <h2>¿Qué es Inertia.js?</h2>
+                <p>El <span class="highlight">"pegamento"</span> entre Laravel y React</p>
+                <br>
+                <ul>
+                    <li>Crea SPAs <strong>sin necesidad de API REST</strong></li>
+                    <li>Usa el <strong>routing de Laravel</strong> directamente</li>
+                    <li>Comparte datos del backend como <strong>props de React</strong></li>
+                </ul>
+                <br>
+                <pre><code class="language-php">// En el controlador Laravel
+return Inertia::render('Products/Index', [
+    'products' => Product::all()  // ← Pasa como prop
+]);</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 4: PASO 1 - CONFIGURACIÓN ==================== -->
+            <section>
+                <h2>Paso 1: Configuración del Entorno</h2>
+                <pre><code class="language-bash"># Crear proyecto Laravel
+composer create-project laravel/laravel mi-proyecto
+cd mi-proyecto
+
+# Instalar Breeze con React + TypeScript
+composer require laravel/breeze --dev
+php artisan breeze:install react --typescript --pest
+
+# Instalar dependencias NPM
+npm install
+
+# Ejecutar migraciones
+php artisan migrate</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 5: PASO 2 - MIGRACIÓN ==================== -->
+            <section>
+                <h2>Paso 2: Migración de Base de Datos</h2>
+                <pre><code class="language-bash"># Crear modelo, migración y controlador
+php artisan make:model Product -mcr</code></pre>
+                <pre><code class="language-php">// database/migrations/xxxx_create_products_table.php
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->text('description')->nullable();
+    $table->decimal('price', 10, 2);
+    $table->integer('stock')->default(0);
+    $table->enum('status', ['active', 'inactive', 'discontinued'])
+          ->default('active');
+    $table->timestamps();
+});</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 6: PASO 2 - MODELO ==================== -->
+            <section>
+                <h2>Paso 2: Modelo Eloquent</h2>
+                <pre><code class="language-php">// app/Models/Product.php
+&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    // Campos asignables masivamente (protección)
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'stock',
+        'status',
+    ];
+
+    // Conversión automática de tipos
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+    ];
+}</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 7: PASO 3 - CONTROLADOR ==================== -->
+            <section>
+                <section>
+                    <h2>Paso 3: Controlador con Inertia</h2>
+                    <p class="fragment">Método <span class="highlight">index()</span> - Listar productos</p>
+                    <pre class="fragment"><code class="language-php">public function index(): Response
+{
+    return Inertia::render('Products/Index', [
+        // Los productos se envían como prop a React
+        'products' => Product::orderBy('created_at', 'desc')->get(),
+    ]);
+}</code></pre>
+                    <p class="fragment" style="font-size: 0.8em;">
+                        <span class="success">✓</span> <code>Inertia::render()</code> renderiza un componente React
+                    </p>
+                </section>
+                
+                <section>
+                    <h2>Método store() - Crear</h2>
+                    <pre><code class="language-php">public function store(Request $request): JsonResponse
+{
+    // Validación de datos
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric|min:0',
+        'stock' => 'required|integer|min:0',
+        'status' => 'required|in:active,inactive,discontinued',
+    ]);
+
+    $product = Product::create($validated);
+
+    return response()->json([
+        'message' => '¡Producto creado!',
+        'product' => $product,
+    ], 201);
+}</code></pre>
+                </section>
+
+                <section>
+                    <h2>Métodos update() y destroy()</h2>
+                    <pre><code class="language-php">public function update(Request $request, int $id): JsonResponse
+{
+    $validated = $request->validate([...]);
+    
+    $product = Product::findOrFail($id);
+    $product->update($validated);
+
+    return response()->json([
+        'message' => '¡Producto actualizado!',
+        'product' => $product,
+    ]);
+}
+
+public function destroy(int $id): RedirectResponse
+{
+    Product::findOrFail($id)->delete();
+    return redirect()->back()->with('success', '¡Eliminado!');
+}</code></pre>
+                </section>
+            </section>
+
+            <!-- ==================== SLIDE 8: PASO 4 - RUTAS ==================== -->
+            <section>
+                <h2>Paso 4: Rutas Web</h2>
+                <pre><code class="language-php">// routes/web.php
+use App\Http\Controllers\ProductController;
+
+// Rutas CRUD protegidas por autenticación
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    Route::get('/products', [ProductController::class, 'index'])
+        ->name('products.index');
+    
+    Route::post('/products', [ProductController::class, 'store'])
+        ->name('products.store');
+    
+    Route::put('/products/{id}', [ProductController::class, 'update'])
+        ->name('products.update');
+    
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])
+        ->name('products.destroy');
+});</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 9: PASO 5 - TYPESCRIPT ==================== -->
+            <section>
+                <h2>Paso 5: Tipos TypeScript</h2>
+                <pre><code class="language-typescript">// resources/js/types/index.d.ts
+
+// Interfaz que refleja la tabla 'products'
+export interface Product {
+    id: number;
+    name: string;
+    description: string | null;  // Puede ser null
+    price: number;
+    stock: number;
+    status: 'active' | 'inactive' | 'discontinued';
+    created_at: string;
+    updated_at: string;
+}
+
+// Props para páginas con productos
+export interface ProductsPageProps extends Record&lt;string, unknown&gt; {
+    products: Product[];
+}</code></pre>
+                <p style="font-size: 0.8em;">
+                    <span class="success">✓</span> TypeScript detecta errores <strong>antes de ejecutar</strong>
+                </p>
+            </section>
+
+            <!-- ==================== SLIDE 10: PASO 6 - REACT PÁGINA ==================== -->
+            <section>
+                <section>
+                    <h2>Paso 6: Componente React Principal</h2>
+                    <pre class="small-code"><code class="language-tsx">// resources/js/Pages/Products/Index.tsx
+import { useState, useEffect } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { Product, PageProps, ProductsPageProps } from '@/types';
+
+export default function Index({ products }: PageProps&lt;ProductsPageProps&gt;) {
+    const [data, setData] = useState&lt;Product[]&gt;(products);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Sincronizar cuando cambien los props
+    useEffect(() =&gt; {
+        setData(products);
+    }, [products]);
+
+    const handleDelete = (id: number) =&gt; {
+        if (confirm('¿Eliminar producto?')) {
+            router.delete(`/products/${id}`);
+        }
+    };
+
+    return (
+        &lt;AuthenticatedLayout&gt;
+            &lt;Head title="Productos" /&gt;
+            &lt;ProductTable products={data} onDelete={handleDelete} /&gt;
+        &lt;/AuthenticatedLayout&gt;
+    );
+}</code></pre>
+                </section>
+
+                <section>
+                    <h2>Hooks de React Usados</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hook</th>
+                                <th>Propósito</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>useState</code></td>
+                                <td>Manejo de estado local</td>
+                            </tr>
+                            <tr>
+                                <td><code>useEffect</code></td>
+                                <td>Sincronización de datos</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br>
+                    <p><code class="highlight">router.delete()</code> - Inertia maneja la petición HTTP</p>
+                </section>
+            </section>
+
+            <!-- ==================== SLIDE 11: TABLA DE PRODUCTOS ==================== -->
+            <section>
+                <h2>Componente: ProductTable</h2>
+                <pre class="small-code"><code class="language-tsx">// resources/js/Components/Products/ProductTable.tsx
+interface ProductTableProps {
+    products: Product[];
+    onEdit: (product: Product) =&gt; void;
+    onDelete: (id: number) =&gt; void;
+}
+
+export default function ProductTable({ products, onEdit, onDelete }: ProductTableProps) {
+    return (
+        &lt;table className="min-w-full divide-y divide-gray-200"&gt;
+            &lt;thead&gt;
+                &lt;tr&gt;
+                    &lt;th&gt;Nombre&lt;/th&gt;
+                    &lt;th&gt;Precio&lt;/th&gt;
+                    &lt;th&gt;Stock&lt;/th&gt;
+                    &lt;th&gt;Acciones&lt;/th&gt;
+                &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+                {products.map((product) =&gt; (
+                    &lt;tr key={product.id}&gt;
+                        &lt;td&gt;{product.name}&lt;/td&gt;
+                        &lt;td&gt;{product.price} €&lt;/td&gt;
+                        &lt;td&gt;{product.stock}&lt;/td&gt;
+                        &lt;td&gt;
+                            &lt;button onClick={() =&gt; onEdit(product)}&gt;Editar&lt;/button&gt;
+                            &lt;button onClick={() =&gt; onDelete(product.id)}&gt;Eliminar&lt;/button&gt;
+                        &lt;/td&gt;
+                    &lt;/tr&gt;
+                ))}
+            &lt;/tbody&gt;
+        &lt;/table&gt;
+    );
+}</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 12: MODAL ==================== -->
+            <section>
+                <h2>Componente: ProductModal</h2>
+                <pre class="small-code"><code class="language-tsx">// Petición fetch al backend
+const handleSubmit = async (e: FormEvent) =&gt; {
+    e.preventDefault();
+    
+    const response = await fetch('/products', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector(
+                'meta[name="csrf-token"]'
+            )?.content || '',
+        },
+        body: JSON.stringify({
+            name: formData.name,
+            price: parseFloat(formData.price),
+            stock: parseInt(formData.stock),
+            status: formData.status,
+        }),
+    });
+
+    if (response.ok) {
+        const data = await response.json();
+        onSuccess(data.product);  // Actualiza estado padre
+        onClose();
+    }
+};</code></pre>
+            </section>
+
+            <!-- ==================== SLIDE 13: FLUJO DE DATOS ==================== -->
+            <section>
+                <h2>Flujo de Datos Inertia</h2>
+                <div style="text-align: center; font-size: 1.2em;">
+                    <p>
+                        <span class="badge badge-laravel">Laravel Controller</span>
+                        <br>↓ <code>Inertia::render()</code>
+                    </p>
+                    <p>
+                        <span class="badge badge-react">React Component</span>
+                        <br>↓ <code>props.products</code>
+                    </p>
+                    <p>
+                        <span style="background: #2ecc71; padding: 5px 15px; border-radius: 20px;">Vista Renderizada</span>
+                    </p>
+                </div>
+                <br>
+                <p style="font-size: 0.8em;">
+                    <span class="warning">⚡</span> Sin necesidad de API REST separada
+                </p>
+            </section>
+
+            <!-- ==================== SLIDE 14: COMANDOS ÚTILES ==================== -->
+            <section>
+                <h2>Comandos Útiles</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Comando</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>php artisan serve</code></td>
+                            <td>Inicia servidor PHP</td>
+                        </tr>
+                        <tr>
+                            <td><code>npm run dev</code></td>
+                            <td>Inicia Vite (hot reload)</td>
+                        </tr>
+                        <tr>
+                            <td><code>npm run build</code></td>
+                            <td>Compila para producción</td>
+                        </tr>
+                        <tr>
+                            <td><code>php artisan route:list</code></td>
+                            <td>Lista todas las rutas</td>
+                        </tr>
+                        <tr>
+                            <td><code>php artisan migrate:fresh</code></td>
+                            <td>Reinicia la BD</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ==================== SLIDE 15: ESTRUCTURA DE ARCHIVOS ==================== -->
+            <section>
+                <h2>Estructura del Proyecto</h2>
+                <div class="two-columns">
+                    <div>
+                        <h4 class="highlight">Backend (PHP)</h4>
+                        <pre style="font-size: 0.5em;"><code>app/
+├── Http/Controllers/
+│   └── ProductController.php
+├── Models/
+│   └── Product.php
+database/
+└── migrations/
+    └── create_products_table.php
+routes/
+└── web.php</code></pre>
+                    </div>
+                    <div>
+                        <h4 class="highlight">Frontend (TypeScript)</h4>
+                        <pre style="font-size: 0.5em;"><code>resources/js/
+├── Components/
+│   └── Products/
+│       ├── ProductTable.tsx
+│       └── ProductModal.tsx
+├── Pages/
+│   └── Products/
+│       └── Index.tsx
+└── types/
+    └── index.d.ts</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== SLIDE 16: PRÓXIMOS PASOS ==================== -->
+            <section>
+                <h2>Próximos Pasos</h2>
+                <ul>
+                    <li class="fragment"><span class="success">✓</span> Implementar <strong>paginación</strong> en la tabla</li>
+                    <li class="fragment"><span class="success">✓</span> Añadir <strong>búsqueda y filtros</strong></li>
+                    <li class="fragment"><span class="success">✓</span> Ordenación por columnas</li>
+                    <li class="fragment"><span class="success">✓</span> Validación con <strong>React Hook Form</strong></li>
+                    <li class="fragment"><span class="success">✓</span> Tests con <strong>Pest</strong> (PHP) y <strong>Jest</strong> (TS)</li>
+                    <li class="fragment"><span class="success">✓</span> Despliegue en producción</li>
+                </ul>
+            </section>
+
+            <!-- ==================== SLIDE 17: RECURSOS ==================== -->
+            <section>
+                <h2>Recursos de Aprendizaje</h2>
+                <ul>
+                    <li><a href="https://laravel.com/docs" target="_blank">Documentación Laravel</a></li>
+                    <li><a href="https://inertiajs.com/" target="_blank">Documentación Inertia.js</a></li>
+                    <li><a href="https://react.dev/" target="_blank">Documentación React</a></li>
+                    <li><a href="https://www.typescriptlang.org/docs/" target="_blank">TypeScript Handbook</a></li>
+                    <li><a href="https://tailwindcss.com/docs" target="_blank">Tailwind CSS</a></li>
+                </ul>
+            </section>
+
+            <!-- ==================== SLIDE 18: FINAL ==================== -->
+            <section>
+                <h1>¡Gracias!</h1>
+                <p style="font-size: 1.2em;">¿Preguntas?</p>
+                <br>
+                <p>
+                    <span class="badge badge-laravel">Laravel 12</span>
+                    <span class="badge badge-react">React 19</span>
+                    <span class="badge badge-ts">TypeScript 5</span>
+                </p>
+                <br>
+                <p style="font-size: 0.7em;">
+                    <strong>Máximo Fernández Riera</strong><br>
+                    CIFP Francesc de Borja Moll<br>
+                    <a href="https://github.com/maximofernandezriera" target="_blank">github.com/maximofernandezriera</a>
+                </p>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Reveal.js Scripts via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/notes/notes.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/markdown/markdown.min.js"></script>
+    
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            transition: 'slide',
+            plugins: [RevealHighlight, RevealNotes, RevealMarkdown]
+        });
+    </script>
+</body>
+</html>
